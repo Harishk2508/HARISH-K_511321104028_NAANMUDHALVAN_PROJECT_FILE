@@ -1,0 +1,99 @@
+{% extends 'myapp/base.html' %} {% block content %}
+<!-- <div class="container py-1 ">
+    <div class="card bg-gradient bg-success ">
+        <div class="card-body">
+            <h2 class="my-3 text-center text-dark ">Bus Reservation System</h2>
+        </div>
+    </div>
+</div> -->
+<style>
+    .card-body {
+        background-color: #FCCB06 ;
+        box-shadow: 20px 20px 20px ;
+    }
+    
+    
+</style>
+
+
+
+
+<div class="container py-1 ">
+    
+        <div class="row justify-content-center">
+         <div class="col-md-8"> <div class="card bg-gradient bg-success"> 
+            <div class="card-body"> 
+                <div class="backcont">
+                    <h2 class="my-3 text-center text-dark">Welcome to the Bus Reservation System</h2> 
+                <p class="lead text-center">Book your bus tickets with ease and convenience.</p>
+                 <hr> <div class="row"> 
+                    <div class="col-md-6"> 
+                        <div class="card bg-light"> 
+                            <div class="card-body "> <h4 class="card-title">Search for Buses</h4> 
+                                <p class="card-text">Find available buses for your desired route and schedule.</p> <a href="{% url 'findbus' %}" class="btn btn-primary">Search Buses</a> 
+                            </div> 
+                        </div> 
+                    </div> 
+                    <div class="col-md-6"> 
+                        <div class="card bg-light">
+                             <div class="card-body py-4">
+                                 <h4 class="card-title">View Your Bookings</h4>
+                                 <p class="card-text">Check the status of your existing bus reservations.</p> 
+                                 <a href="{% url 'seebookings' %}" class="btn btn-primary">View Bookings</a> </div>
+                             </div> 
+                        </div>
+                    </div> 
+                </div> 
+            </div> 
+        </div> 
+    </div> 
+</div> 
+</div> 
+ <!-- New container for list of buses -->
+<div class="container py-1">
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+        <div class="card">
+          <div class="card-body">
+            <h3 class="card-title">List of Available Buses</h3>
+           
+            {% if buses %}
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Bus Name</th>
+                  <th>Source</th>
+                  <th>Destination</th>
+                  <th>Number of Seats</th>
+                  <th>Remaining Seats</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for bus in buses %}
+                <tr>
+                  <td>{{ bus.bus_name }}</td>
+                  <td>{{ bus.source }}</td>
+                  <td>{{ bus.dest }}</td>
+                  <td>{{ bus.nos }}</td>
+                  <td>{{ bus.rem }}</td>
+                  <td>{{ bus.date }}</td>
+                  <td>{{ bus.time }}</td>
+                  <td>
+                    <a href="{% url 'findbus' %}" class="btn btn-primary">Book</a>
+                </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% else %}
+            <p>No buses available.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
