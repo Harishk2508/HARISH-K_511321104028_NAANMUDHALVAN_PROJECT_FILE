@@ -19,155 +19,153 @@ USERNAME: admin
 
 PASSWORD: admin
 
-package com.example.pgweb.entity;
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>PG Registration</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <h1>PG Registration</h1>
+    <form th:action="@{/register}" th:object="${user}" method="post">
+        <label for="name">Name:</label>
+        <input type="text" id="name" th:field="*{name}" required><br>
 
-import jakarta.persistence.*;
+        <label for="email">Email:</label>
+        <input type="email" id="email" th:field="*{email}" required><br>
 
-@Entity
-@Table(name = "users")
-public class User {
+        <label for="phoneNumber">Phone Number:</label>
+        <input type="tel" id="phoneNumber" th:field="*{phoneNumber}" required><br>
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+        <label for="aadhaarNumber">Aadhaar Number:</label>
+        <input type="text" id="aadhaarNumber" th:field="*{aadhaarNumber}" required><br>
 
-    private String name;
-    private String email;
-    private String phoneNumber;
-    private String aadhaarNumber;
-    private String city;
+        <label for="city">City:</label>
+        <input type="text" id="city" th:field="*{city}" required><br>
 
-    // Getters and setters
+        <input type="submit" value="Register">
+    </form>
+</body>
+</html>
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Vacant Rooms</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <h1>Vacant Rooms and Pricing</h1>
+    <table>
+        <tr>
+            <th>Room Type</th>
+            <th>Availability</th>
+            <th>Cost per Person</th>
+        </tr>
+        <tr>
+            <td>Single Room</td>
+            <td>5</td>
+            <td>₹5000/month</td>
+        </tr>
+        <tr>
+            <td>Double Sharing</td>
+            <td>10</td>
+            <td>₹3500/month</td>
+        </tr>
+        <tr>
+            <td>Triple Sharing</td>
+            <td>15</td>
+            <td>₹2500/month</td>
+        </tr>
+    </table>
+</body>
+</html>
 
-    public String getName() {
-        return name;
-    }
 
-    public void setName(String name) {
-        this.name = name;
-    }
 
-    public String getEmail() {
-        return email;
-    }
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Page</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <h1>Admin Page</h1>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone Number</th>
+            <th>Aadhaar Number</th>
+            <th>City</th>
+        </tr>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.id}"></td>
+            <td th:text="${user.name}"></td>
+            <td th:text="${user.email}"></td>
+            <td th:text="${user.phoneNumber}"></td>
+            <td th:text="${user.aadhaarNumber}"></td>
+            <td th:text="${user.city}"></td>
+        </tr>
+    </table>
+</body>
+</html>
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
 
-    public String getAadhaarNumber() {
-        return aadhaarNumber;
-    }
-
-    public void setAadhaarNumber(String aadhaarNumber) {
-        this.aadhaarNumber = aadhaarNumber;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
+body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
-
-
-package com.example.pgweb.repository;
-
-import com.example.pgweb.entity.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-
-public interface UserRepository extends JpaRepository<User, Long> {
+h1 {
+    color: #333;
 }
 
-
-
-package com.example.pgweb.service;
-
-import com.example.pgweb.entity.User;
-import com.example.pgweb.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-
-@Service
-public class UserService {
-
-    @Autowired
-    private UserRepository userRepository;
-
-    public User saveUser(User user) {
-        return userRepository.save(user);
-    }
-
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+form {
+    margin-bottom: 20px;
 }
 
-
-package com.example.pgweb.controller;
-
-import com.example.pgweb.entity.User;
-import com.example.pgweb.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-
-@Controller
-public class UserController {
-
-    @Autowired
-    private UserService userService;
-
-    @GetMapping("/")
-    public String showRegistrationForm(Model model) {
-        model.addAttribute("user", new User());
-        return "registration";
-    }
-
-    @PostMapping("/register")
-    public String registerUser(User user) {
-        userService.saveUser(user);
-        return "redirect:/rooms";
-    }
-
-    @GetMapping("/rooms")
-    public String showRooms() {
-        return "rooms";
-    }
-
-    @GetMapping("/admin")
-    public String showAdminPage(Model model) {
-        model.addAttribute("users", userService.getAllUsers());
-        return "admin";
-    }
+label {
+    display: inline-block;
+    width: 150px;
+    margin-bottom: 10px;
 }
 
+input[type="text"],
+input[type="email"],
+input[type="tel"] {
+    width: 250px;
+    padding: 5px;
+}
 
-spring.datasource.url=jdbc:mysql://localhost:3306/pg_db
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
+input[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
