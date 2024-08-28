@@ -1,0 +1,413 @@
+﻿Room . Java entity
+
+
+package com.example.pgweb.entity;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "rooms")
+public class Room {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String type;
+    private int availability;
+    private double cost;
+
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public int getAvailability() {
+        return availability;
+    }
+
+    public void setAvailability(int availability) {
+        this.availability = availability;
+    }
+
+    public double getCost() {
+        return cost;
+    }
+
+    public void setCost(double cost) {
+        this.cost = cost;
+    }
+}
+
+
+
+
+
+User. Java entity
+
+package com.example.pgweb.entity;
+
+import jakarta.persistence.*;
+import java.util.List;
+
+@Entity
+@Table(name = "users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    private String email;
+    private String phoneNumber;
+    private String aadhaarNumber;
+    private String city;
+
+    @OneToMany(mappedBy = "user")
+    private List<Booking> bookings;
+
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getAadhaarNumber() {
+        return aadhaarNumber;
+    }
+
+    public void setAadhaarNumber(String aadhaarNumber) {
+        this.aadhaarNumber = aadhaarNumber;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = bookings;
+    }
+}
+
+
+Booking. Java entity
+
+package com.example.pgweb.entity;
+
+import jakarta.persistence.*;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "bookings")
+public class Booking {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "room_id")
+    private Room room;
+
+    private LocalDate checkInDate;
+    private LocalDate checkOutDate;
+
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
+    }
+
+    public LocalDate getCheckInDate() {
+        return checkInDate;
+    }
+
+    public void setCheckInDate(LocalDate checkInDate) {
+        this.checkInDate = checkInDate;
+    }
+
+    public LocalDate getCheckOutDate() {
+        return checkOutDate;
+    }
+
+    public void setCheckOutDate(LocalDate checkOutDate) {
+        this.checkOutDate = checkOutDate;
+    }
+}
+
+
+Controller. Java
+
+package com.example.pgweb.controller;
+
+import com.example.pgweb.entity.Booking;
+import com.example.pgweb.entity.Room;
+import com.example.pgweb.entity.User;
+import com.example.pgweb.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+@Controller
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+
+    @GetMapping("/")
+    public String showRegistrationForm(Model model) {
+        model.addAttribute("user", new User());
+        return "registration";
+    }
+
+    @PostMapping("/register")
+    public String registerUser(User user) {
+        userService.saveUser(user);
+        return "redirect:/rooms";
+    }
+
+    @GetMapping("/rooms")
+    public String showRooms(Model model) {
+        model.addAttribute("rooms", userService.getAllRooms());
+        return "rooms";
+    }
+
+    @GetMapping("/booking")
+    public String showBookingForm(@RequestParam Long roomId, Model model) {
+        Room room = userService.getRoomById(roomId);
+        if (room == null) {
+            return "redirect:/rooms";
+        }
+        Booking booking = new Booking();
+        booking.setRoom(room);
+        booking.setUser(new User());
+        model.addAttribute("booking", booking);
+        return "booking";
+    }
+
+    @PostMapping("/book")
+    public String bookRoom(Booking booking) {
+        userService.saveBooking(booking);
+        return "redirect:/rooms";
+    }
+
+    @GetMapping("/admin")
+    public String showAdminPage(Model model) {
+        model.addAttribute("users", userService.getAllUsers());
+        model.addAttribute("bookings", userService.getAllBookings());
+        return "admin";
+    }
+}
+
+
+
+Service. Java
+
+package com.example.pgweb.service;
+
+import com.example.pgweb.entity.Booking;
+import com.example.pgweb.entity.Room;
+import com.example.pgweb.entity.User;
+import com.example.pgweb.repository.BookingRepository;
+import com.example.pgweb.repository.RoomRepository;
+import com.example.pgweb.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private RoomRepository roomRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
+
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public List<Room> getAllRooms() {
+        return roomRepository.findAll();
+    }
+
+    public Room getRoomById(Long id) {
+        return roomRepository.findById(id).orElse(null);
+    }
+
+    public Booking saveBooking(Booking booking) {
+        User user = userRepository.save(booking.getUser());
+        booking.setUser(user);
+
+        Room room = booking.getRoom();
+        room.setAvailability(room.getAvailability() - 1);
+        roomRepository.save(room);
+
+        return bookingRepository.save(booking);
+    }
+
+    public List<Booking> getAllBookings() {
+        return bookingRepository.findAll();
+    }
+}
+
+
+
+Updated rooms. Html
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Vacant Rooms and Pricing</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <h1>Vacant Rooms and Pricing</h1>
+    <table>
+        <tr>
+            <th>Room Name</th>
+            <th>Room Type</th>
+            <th>Availability</th>
+            <th>Cost per Person</th>
+            <th>Action</th>
+        </tr>
+        <tr th:each="room : ${rooms}">
+            <td th:text="${room.name}"></td>
+            <td th:text="${room.type}"></td>
+            <td th:text="${room.availability}"></td>
+            <td th:text="${'₹' + room.cost + '/month'}"></td>
+            <td>
+                <form th:action="@{/booking}" method="get">
+                    <input type="hidden" name="roomId" th:value="${room.id}">
+                    <input type="submit" value="Book" th:disabled="${room.availability == 0}">
+                </form>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+
+Bookings. Html
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Room Booking</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <h1>Room Booking</h1>
+    <form th:action="@{/book}" method="post" th:object="${booking}">
+        <input type="hidden" th:field="*{room.id}">
+        
+        <label for="name">Name:</label>
+        <input type="text" id="name" th:field="*{user.name}" required><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" th:field="*{user.email}" required><br>
+
+        <label for="phoneNumber">Phone Number:</label>
+        <input type="tel" id="phoneNumber" th:field="*{user.phoneNumber}" required><br>
+
+        <label for="checkInDate">Check-in Date:</label>
+        <input type="date" id="checkInDate" th:field="*{checkInDate}" required><br>
+
+        <label for="checkOutDate">Check-out Date:</label>
+        <input type="date" id="checkOutDate" th:field="*{checkOutDate}" required><br>
+
+        <input type="submit" value="Confirm Booking">
+    </form>
+</body>
+</html>
