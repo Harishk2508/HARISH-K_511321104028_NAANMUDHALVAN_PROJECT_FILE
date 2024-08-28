@@ -1,0 +1,75 @@
+﻿Success. Html
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Successful</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <h1>Booking Successful!</h1>
+    <div class="booking-details">
+        <h2>Booking Details:</h2>
+        <p><strong>Name:</strong> <span th:text="${booking.user.name}"></span></p>
+        <p><strong>Phone Number:</strong> <span th:text="${booking.user.phoneNumber}"></span></p>
+        <p><strong>Room Booked:</strong> <span th:text="${booking.room.name}"></span></p>
+        <p><strong>Room Type:</strong> <span th:text="${booking.room.type}"></span></p>
+        <p><strong>Cost:</strong> ₹<span th:text="${booking.room.cost}"></span> per month</p>
+        <p><strong>Check-in Date:</strong> <span th:text="${booking.checkInDate}"></span></p>
+        <p><strong>Check-out Date:</strong> <span th:text="${booking.checkOutDate}"></span></p>
+    </div>
+    <a href="/rooms">Back to Rooms</a>
+</body>
+</html>
+Update user controller. Java
+@PostMapping("/book")
+public String bookRoom(Booking booking, Model model) {
+    Booking savedBooking = userService.saveBooking(booking);
+    model.addAttribute("booking", savedBooking);
+    return "success";
+}
+
+Update service. Java
+
+
+@Transactional
+public Booking saveBooking(Booking booking) {
+    User user = userRepository.save(booking.getUser());
+    booking.setUser(user);
+
+    Room room = roomRepository.findById(booking.getRoom().getId()).orElseThrow(() -> new RuntimeException("Room not found"));
+    room.setAvailability(room.getAvailability() - 1);
+    roomRepository.save(room);
+
+    booking.setRoom(room);
+    return bookingRepository.save(booking);
+}
+
+
+Update booking. Html
+
+<form th:action="@{/book}" method="post" th:object="${booking}">
+    <input type="hidden" th:field="*{room.id}">
+    
+    <label for="name">Name:</label>
+    <input type="text" id="name" th:field="*{user.name}" required><br>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" th:field="*{user.email}" required><br>
+
+    <label for="phoneNumber">Phone Number:</label>
+    <input type="tel" id="phoneNumber" th:field="*{user.phoneNumber}" required><br>
+
+    <label for="checkInDate">Check-in Date:</label>
+    <input type="date" id="checkInDate" th:field="*{checkInDate}" required><br>
+
+    <label for="checkOutDate">Check-out Date:</label>
+    <input type="date" id="checkOutDate" th:field="*{checkOutDate}" required><br>
+
+    <input type="submit" value="Confirm Booking">
+</form>
+
+
+
+
